@@ -7,5 +7,5 @@ public class Order : AuditedEntity
     
     public decimal TotalAmount { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string status { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
 }
