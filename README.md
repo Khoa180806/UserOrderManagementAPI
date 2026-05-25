@@ -1,33 +1,61 @@
 # User Order Management System
 
-A .NET 8 Web API for managing users, roles, user-role assignments, and customer orders. The project demonstrates a practical backend implementation using Entity Framework Core, SQL Server, ABP-style audit fields, soft delete, relational mapping, reporting queries, pagination, and common performance optimizations.
+<p align="center">
+  <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 8" />
+  <img src="https://img.shields.io/badge/ASP.NET_Core-Web_API-0A66C2?style=for-the-badge&logo=dotnet&logoColor=white" alt="ASP.NET Core Web API" />
+  <img src="https://img.shields.io/badge/Entity_Framework_Core-8.0-6DB33F?style=for-the-badge" alt="Entity Framework Core" />
+  <img src="https://img.shields.io/badge/SQL_Server-Database-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white" alt="SQL Server" />
+</p>
 
-## Features
+## Giới thiệu
 
-- User management with list, search, pagination, create, and soft delete APIs
-- Role-based relationship model using a many-to-many `UserRoles` table
-- Order management data model with customer-order relationships
-- Revenue report endpoint grouped by order date
-- Top customer report based on completed order value
-- ABP-style audit columns:
+**User Order Management System** là một mini project tự học về backend với **.NET 8**, **ASP.NET Core Web API**, **Entity Framework Core** và **SQL Server**.
+
+Dự án tập trung vào các kiến thức nền tảng nhưng rất thực tế trong phát triển backend: thiết kế database quan hệ, mapping EF Core, CRUD API, phân trang, tìm kiếm, soft delete, seed data, viết SQL query báo cáo và tối ưu hiệu năng query.
+
+Project này phù hợp để luyện tập các kỹ năng backend quan trọng trước khi bước sang các kiến trúc lớn hơn như Clean Architecture, CQRS, DDD hoặc ABP Framework.
+
+## Mục lục
+
+- [Giới thiệu](#giới-thiệu)
+- [Tính năng chính](#tính-năng-chính)
+- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
+- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
+- [Thiết kế database](#thiết-kế-database)
+- [Cài đặt và chạy project](#cài-đặt-và-chạy-project)
+- [API endpoints](#api-endpoints)
+- [Ví dụ request](#ví-dụ-request)
+- [SQL query mẫu](#sql-query-mẫu)
+- [Ghi chú về EF Core](#ghi-chú-về-ef-core)
+- [Tối ưu hiệu năng](#tối-ưu-hiệu-năng)
+- [Mục tiêu học tập](#mục-tiêu-học-tập)
+
+## Tính năng chính
+
+- Quản lý người dùng với API danh sách, tìm kiếm, phân trang, tạo mới và soft delete
+- Quản lý vai trò người dùng thông qua bảng trung gian `UserRoles`
+- Quản lý dữ liệu đơn hàng theo từng người dùng
+- Báo cáo doanh thu theo ngày
+- Báo cáo top khách hàng có tổng chi tiêu cao nhất
+- Áp dụng các trường audit theo phong cách ABP:
   - `CreationTime`
   - `CreatorUserId`
   - `LastModificationTime`
   - `IsDeleted`
-- Database constraints:
-  - Unique email
-  - Foreign keys
-  - Check constraint for `Age > 0`
-- Database indexes:
+- Ràng buộc database:
+  - Email duy nhất
+  - Foreign key
+  - Check constraint `Age > 0`
+- Index database:
   - `Users.Email`
   - `Orders.UserId`
   - `Orders.CreatedAt`
-- EF Core global query filters for soft delete
-- Seed data for local development
-- SQL examples for joins, reporting, search, and pagination
-- Swagger UI for API testing
+- Soft delete bằng EF Core global query filter
+- Seed data khi database chưa có dữ liệu
+- Swagger UI để test API
+- File `query.sql` chứa các câu SQL phục vụ học tập và kiểm tra dữ liệu
 
-## Tech Stack
+## Công nghệ sử dụng
 
 - .NET 8
 - ASP.NET Core Web API
@@ -37,7 +65,7 @@ A .NET 8 Web API for managing users, roles, user-role assignments, and customer 
 - JetBrains Rider
 - DataGrip
 
-## Project Structure
+## Cấu trúc thư mục
 
 ```text
 UserOrderManagerment/
@@ -64,13 +92,13 @@ UserOrderManagerment/
 └── query.sql
 ```
 
-## Database Model
+## Thiết kế database
 
 ### Users
 
-Stores customer/user profile information.
+Bảng `Users` lưu thông tin người dùng.
 
-Key fields:
+Các cột chính:
 
 - `Id`
 - `FullName`
@@ -81,30 +109,33 @@ Key fields:
 - `LastModificationTime`
 - `IsDeleted`
 
-Rules:
+Ràng buộc:
 
-- `Email` is unique
-- `Age` must be greater than `0`
-- Soft-deleted users are filtered by default
+- `Email` là duy nhất
+- `Age` phải lớn hơn `0`
+- Dữ liệu soft delete được lọc mặc định bằng global query filter
 
 ### Roles
 
-Stores application roles such as `Admin` and `Customer`.
+Bảng `Roles` lưu danh sách vai trò, ví dụ:
+
+- `Admin`
+- `Customer`
 
 ### UserRoles
 
-Join table for the many-to-many relationship between users and roles.
+Bảng `UserRoles` là bảng trung gian thể hiện quan hệ nhiều-nhiều giữa `Users` và `Roles`.
 
-Composite primary key:
+Khóa chính gồm:
 
 - `UserId`
 - `RoleId`
 
 ### Orders
 
-Stores customer order data.
+Bảng `Orders` lưu thông tin đơn hàng của người dùng.
 
-Key fields:
+Các cột chính:
 
 - `Id`
 - `UserId`
@@ -116,32 +147,32 @@ Key fields:
 - `LastModificationTime`
 - `IsDeleted`
 
-Indexes:
+Index:
 
 - `UserId`
 - `CreatedAt`
 
-## Getting Started
+## Cài đặt và chạy project
 
-### Prerequisites
+### Yêu cầu môi trường
 
-Install the following tools:
+Cài đặt các công cụ sau:
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- .NET 8 SDK
 - SQL Server
 - JetBrains Rider
 - DataGrip
 
-### Clone the Repository
+### Clone project
 
 ```bash
-git clone <your-repository-url>
+git clone <repository-url>
 cd UserOrderManagerment
 ```
 
-### Configure Database Connection
+### Cấu hình connection string
 
-Update the connection string in `UserOrderManagerment/appsettings.json`:
+Mở file `UserOrderManagerment/appsettings.json` và chỉnh connection string:
 
 ```json
 {
@@ -151,7 +182,7 @@ Update the connection string in `UserOrderManagerment/appsettings.json`:
 }
 ```
 
-For SQL Server authentication:
+Nếu dùng SQL Server Authentication:
 
 ```json
 {
@@ -161,20 +192,20 @@ For SQL Server authentication:
 }
 ```
 
-### Restore Packages
+### Restore package
 
 ```bash
 dotnet restore
 ```
 
-### Apply Database Migration
+### Tạo database bằng migration
 
 ```bash
 cd UserOrderManagerment
 dotnet ef database update
 ```
 
-### Run the API
+### Chạy ứng dụng
 
 ```bash
 dotnet run
@@ -187,27 +218,29 @@ https://localhost:7221/swagger
 http://localhost:5220/swagger
 ```
 
-The application seeds initial users, roles, user-role assignments, and orders on startup when the database is empty.
+Khi chạy ứng dụng, project sẽ tự seed dữ liệu mẫu nếu database đang trống.
 
-## API Endpoints
+## API endpoints
 
 ### Users
 
-| Method | Endpoint | Description |
+| Method | Endpoint | Mô tả |
 | --- | --- | --- |
-| GET | `/api/users` | Get all active users |
-| GET | `/api/users/search?keyword=a&page=1&pageSize=10` | Search users with pagination |
-| POST | `/api/users` | Create a new user |
-| DELETE | `/api/users/{id}` | Soft delete a user |
+| GET | `/api/users` | Lấy danh sách người dùng đang hoạt động |
+| GET | `/api/users/search?keyword=a&page=1&pageSize=10` | Tìm kiếm người dùng có phân trang |
+| POST | `/api/users` | Tạo người dùng mới |
+| DELETE | `/api/users/{id}` | Soft delete người dùng |
 
 ### Reports
 
-| Method | Endpoint | Description |
+| Method | Endpoint | Mô tả |
 | --- | --- | --- |
-| GET | `/api/reports/revenue` | Get daily revenue report |
-| GET | `/api/reports/top-customers` | Get top 10 customers by total completed order value |
+| GET | `/api/reports/revenue` | Báo cáo doanh thu theo ngày |
+| GET | `/api/reports/top-customers` | Top 10 khách hàng theo tổng giá trị đơn hàng hoàn thành |
 
-## Sample User Create Request
+## Ví dụ request
+
+Tạo người dùng mới:
 
 ```json
 {
@@ -217,18 +250,44 @@ The application seeds initial users, roles, user-role assignments, and orders on
 }
 ```
 
-## SQL Examples
+Tìm kiếm người dùng:
 
-The project includes `UserOrderManagerment/query.sql` with useful SQL queries for:
+```text
+GET /api/users/search?keyword=nguyen&page=1&pageSize=10
+```
 
-- Joining users and roles
-- Joining users and orders
-- Revenue reporting
-- Top customer reporting
-- Search
-- Pagination
+## SQL query mẫu
 
-Example revenue report:
+Project có file `UserOrderManagerment/query.sql` chứa các câu SQL để luyện tập và kiểm tra dữ liệu.
+
+### Join User và Role
+
+```sql
+SELECT u.Id,
+       u.FullName,
+       u.Email,
+       r.Name AS RoleName
+FROM Users u
+JOIN UserRoles ur ON u.Id = ur.UserId
+JOIN Roles r ON ur.RoleId = r.Id
+WHERE u.IsDeleted = 0;
+```
+
+### Join User và Orders
+
+```sql
+SELECT u.Id,
+       u.FullName,
+       o.Id AS OrderId,
+       o.TotalAmount,
+       o.CreatedAt
+FROM Users u
+JOIN Orders o ON u.Id = o.UserId
+WHERE u.IsDeleted = 0
+  AND o.IsDeleted = 0;
+```
+
+### Báo cáo doanh thu
 
 ```sql
 SELECT CAST(o.CreatedAt AS date) AS OrderDate,
@@ -241,7 +300,35 @@ GROUP BY CAST(o.CreatedAt AS date)
 ORDER BY OrderDate DESC;
 ```
 
-Example pagination:
+### Top khách hàng
+
+```sql
+SELECT TOP 10 u.Id,
+       u.FullName,
+       u.Email,
+       SUM(o.TotalAmount) AS TotalSpent
+FROM Users u
+JOIN Orders o ON u.Id = o.UserId
+WHERE u.IsDeleted = 0
+  AND o.IsDeleted = 0
+  AND o.Status = 'Completed'
+GROUP BY u.Id, u.FullName, u.Email
+ORDER BY TotalSpent DESC;
+```
+
+### Tìm kiếm
+
+```sql
+SELECT *
+FROM Users
+WHERE IsDeleted = 0
+  AND (
+      FullName LIKE '%nguyen%'
+      OR Email LIKE '%nguyen%'
+  );
+```
+
+### Phân trang
 
 ```sql
 SELECT *
@@ -251,48 +338,49 @@ ORDER BY Id
 OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY;
 ```
 
-## EF Core Implementation Notes
+## Ghi chú về EF Core
 
 ### DbContext
 
-`AppDbContext` defines the main entity sets:
+`AppDbContext` quản lý các `DbSet` chính:
 
 - `Users`
 - `Roles`
 - `UserRoles`
 - `Orders`
 
-It also configures:
+Đồng thời cấu hình:
 
-- Table names
-- Property lengths and required fields
-- Unique indexes
-- Foreign key relationships
-- Composite keys
-- Query filters
+- Tên bảng
+- Độ dài field
+- Required field
+- Unique index
+- Foreign key
+- Composite key
+- Check constraint
 - Decimal precision
-- Check constraints
+- Global query filter
 
-### Soft Delete
+### Soft delete
 
-Entities inheriting from `AuditedEntity` include `IsDeleted`.
+Các entity kế thừa `AuditedEntity` đều có trường `IsDeleted`.
 
-Global query filters hide soft-deleted records:
+Global query filter giúp tự động ẩn dữ liệu đã bị soft delete:
 
 ```csharp
 entity.HasQueryFilter(x => !x.IsDeleted);
 ```
 
-The delete API marks a user as deleted instead of removing the row:
+Khi xóa người dùng, API chỉ cập nhật `IsDeleted = true`:
 
 ```csharp
 user.IsDeleted = true;
 await _db.SaveChangesAsync();
 ```
 
-### Tracking and No Tracking
+### Tracking và NoTracking
 
-Read-heavy endpoints use `AsNoTracking()` to reduce EF Core change-tracking overhead:
+Các query chỉ đọc dùng `AsNoTracking()` để giảm chi phí tracking của EF Core:
 
 ```csharp
 var users = await _db.Users
@@ -307,54 +395,34 @@ var users = await _db.Users
     .ToListAsync();
 ```
 
-Update and delete flows use tracking so EF Core can persist entity changes.
+Các luồng cập nhật hoặc xóa dùng tracking để EF Core theo dõi thay đổi và lưu vào database.
 
-## Performance Notes
+## Tối ưu hiệu năng
 
-This project applies several common backend performance practices:
+Dự án áp dụng một số kỹ thuật tối ưu cơ bản:
 
-- Uses indexes on frequent lookup and reporting columns
-- Uses DTO projection instead of returning full entity graphs
-- Uses `AsNoTracking()` for read-only queries
-- Uses pagination for user search
-- Avoids N+1 query patterns by projecting related data in a single query
-- Keeps reporting queries server-side with `GroupBy`, `Sum`, `Count`, and `Take`
+- Tạo index cho các cột thường dùng để tìm kiếm, join và báo cáo
+- Dùng DTO projection thay vì trả về toàn bộ entity graph
+- Dùng `AsNoTracking()` cho query chỉ đọc
+- Phân trang dữ liệu bằng `Skip` và `Take`
+- Tránh N+1 query bằng cách projection dữ liệu liên quan trong cùng một query
+- Thực hiện báo cáo ở database thông qua `GroupBy`, `Sum`, `Count` và `Take`
 
-## Development Workflow
+## Mục tiêu học tập
 
-Recommended workflow:
+Mini project này được xây dựng để luyện tập:
 
-1. Open the solution in JetBrains Rider.
-2. Update the SQL Server connection string in `appsettings.json`.
-3. Run EF Core migrations.
-4. Start the API with the `https` launch profile.
-5. Test endpoints in Swagger.
-6. Use DataGrip to inspect tables, constraints, indexes, and SQL query results.
+- Thiết kế database quan hệ
+- Mapping entity với Entity Framework Core
+- Quan hệ một-nhiều và nhiều-nhiều
+- CRUD API trong ASP.NET Core
+- SQL join, search, pagination và report
+- Soft delete
+- Migration và seed data
+- Tracking và no-tracking query
+- Tối ưu query backend cơ bản
+- Quy trình phát triển backend với Rider và DataGrip
 
-## Useful Commands
+## Ghi chú
 
-```bash
-dotnet restore
-dotnet build
-dotnet run --project UserOrderManagerment
-dotnet ef migrations add <MigrationName> --project UserOrderManagerment
-dotnet ef database update --project UserOrderManagerment
-```
-
-## Learning Goals
-
-This project is designed to practice:
-
-- Relational database design
-- Entity Framework Core mapping
-- Many-to-many relationships
-- SQL joins and reports
-- REST API development
-- Soft delete implementation
-- Pagination
-- Query performance optimization
-- Practical backend development with .NET 8
-
-## License
-
-This project is intended for learning and portfolio use.
+Đây là dự án mini project tự học về .NET backend. Mục tiêu chính là hiểu rõ cách xây dựng API, thiết kế database, thao tác với EF Core và tối ưu query ở mức nền tảng.
